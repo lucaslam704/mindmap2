@@ -42,6 +42,7 @@ export const createAuthStyles = (theme: Theme) => StyleSheet.create({
   googleButtonText: {
     color: theme.colors.text,
     fontSize: 16,
+    fontWeight: '500',
   },
   // Picker styles
   pickerSelectStyles: {
@@ -70,5 +71,6 @@ export const createAuthStyles = (theme: Theme) => StyleSheet.create({
     },
   },
 });
+
 
 

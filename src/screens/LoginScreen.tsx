@@ -64,7 +64,6 @@ export default function LoginScreen() {
         <Image
           source={require('../../public/images/Google.png')}
           style={styles.googleIcon}
-          resizeMode="contain"
         />
         <Text style={styles.googleButtonText}>Sign in with Google</Text>
       </Button>
@@ -85,5 +84,6 @@ export default function LoginScreen() {
     </View>
   );
 }
+
 
 

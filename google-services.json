@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "208612764076",
+    "project_id": "mindmap-f377b",
+    "storage_bucket": "mindmap-f377b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208612764076:android:3d5d2d6fb9c6d74f74f209",
+        "android_client_info": {
+          "package_name": "com.cprg303a.mindmap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "208612764076-dppsfsoktqfcc6r990la6airkutteecn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvX_K6e7FNP-wTrf1EExvaklmLaHnlHpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "208612764076-dppsfsoktqfcc6r990la6airkutteecn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "208612764076-jmqb17e7a627elqoqa6lsbdrb1ivlg3c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cprg303a.mindmap"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

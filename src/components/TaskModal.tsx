@@ -53,7 +53,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
     setPriorityModalVisible(false);
   };
 
-  // Custom priority picker for iOS
   const renderPrioritySelector = () => {
     if (Platform.OS === 'ios') {
       return (
@@ -131,7 +130,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
         </>
       );
     } else {
-      // Use RNPickerSelect for Android
       return (
         <View style={[styles.pickerContainer, { borderColor: theme.colors.border }]}>
           <RNPickerSelect
@@ -189,21 +187,23 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
             placeholder="Task Description"
             value={task.description}
             onChangeText={(text) => setTask({ ...task, description: text })}
+            multiline
+            numberOfLines={4}
             style={{ 
               borderWidth: 1,
               borderRadius: 4,
               padding: 12,
               marginBottom: 16,
               color: theme.colors.text,
-              borderColor: theme.colors.border
+              borderColor: theme.colors.border,
+              height: 100,
+              textAlignVertical: 'top'
             }}
             placeholderTextColor={theme.colors.textSecondary}
           />
-          
-          {/* Priority Selector - Platform specific */}
+
           {renderPrioritySelector()}
 
-          {/* Date Picker Button */}
           <View style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -224,7 +224,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
                 {task.dueDate ? task.dueDate.toLocaleString() : "Select Due Date"}
               </Text>
             </TouchableOpacity>
-            
             {task.dueDate && (
               <TouchableOpacity 
                 onPress={() => setTask({ ...task, dueDate: undefined })} 
@@ -234,6 +233,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
               </TouchableOpacity>
             )}
           </View>
+
           <View style={{ gap: 10, marginTop: 20 }}>
             <Button 
               mode="contained"
@@ -243,7 +243,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
             >
               Add Task
             </Button>
-            
             <Button
               mode="outlined"
               onPress={onClose}
@@ -258,31 +257,19 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
         </View>
       </View>
 
-      {/* iOS Date Picker Modal */}
+      {/* iOS Date Picker */}
       {Platform.OS === 'ios' && datePickerVisible && (
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={datePickerVisible}
-        >
+        <Modal transparent={true} animationType="slide" visible={datePickerVisible}>
           <View style={styles.datePickerModalContainer}>
-            <View style={[styles.datePickerContent, { 
-              backgroundColor: theme.colors.cardBackground 
-            }]}>
-              <View style={{ 
-                backgroundColor: theme.colors.background,
-                borderRadius: 10,
-                overflow: 'hidden'
-              }}>
+            <View style={[styles.datePickerContent, { backgroundColor: theme.colors.cardBackground }]}>
+              <View style={{ backgroundColor: theme.colors.background, borderRadius: 10, overflow: 'hidden' }}>
                 <DateTimePicker
                   value={task.dueDate || new Date()}
                   mode="datetime"
                   display="spinner"
                   textColor={theme.colors.text}
                   onChange={(event, selectedDate) => {
-                    if (selectedDate) {
-                      setTask({ ...task, dueDate: selectedDate });
-                    }
+                    if (selectedDate) setTask({ ...task, dueDate: selectedDate });
                   }}
                   style={{ height: 200 }}
                 />
@@ -310,7 +297,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
         </Modal>
       )}
 
-      {/* Android Date Picker */}
+      {/* Android Pickers */}
       {Platform.OS === 'android' && datePickerVisible && (
         <DateTimePicker
           value={task.dueDate || new Date()}
@@ -324,7 +311,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ visible, onClose, category, refre
           }}
         />
       )}
-
       {Platform.OS === 'android' && timePickerVisible && (
         <DateTimePicker
           value={tempDate || new Date()}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Alert, Image, Text, ImageStyle } from 'react-native';
-import { Button, IconButton } from 'react-native-paper';
+import { View, TextInput, Alert, Image, Text, ImageStyle, Pressable } from 'react-native';
+import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
@@ -25,7 +25,6 @@ export default function LoginScreen() {
     webClientId: "208612764076-dppsfsoktqfcc6r990la6airkutteecn.apps.googleusercontent.com",
   });
 
-  // Handle Google Sign In response
   useEffect(() => {
     if (response?.type === 'success') {
       const { authentication } = response;
@@ -66,7 +65,7 @@ export default function LoginScreen() {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.logoContainer}>
         <Image
-          source={isDarkMode 
+          source={isDarkMode
             ? require('../../public/images/MindMap-white.png')
             : require('../../public/images/MindMap.png')
           }
@@ -100,23 +99,36 @@ export default function LoginScreen() {
       >
         Login with Email
       </Button>
-      <Button
-        mode="contained"
+
+      {/* ✅ Google Login with icon, theme color support, and aligned styling */}
+      <Pressable
         onPress={handleGoogleLogin}
-        style={[styles.button, styles.googleButton]}
-        contentStyle={styles.googleButtonContent}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.colors.background,
+          borderColor: theme.colors.border,
+          borderWidth: 1,
+          borderRadius: 4,
+          paddingVertical: 12,
+          marginBottom: 16,
+          marginTop: 10,
+        }}
       >
         <Image
-          source={require('../../public/images/Google.png')}
-          style={styles.googleIcon as ImageStyle}
+          source={require('../../assets/google-icon.png')}
+          style={{ width: 20, height: 20, marginRight: 8 }}
         />
-        <Text style={[
-          styles.googleButtonText,
-          { color: isDarkMode ? theme.colors.white : theme.colors.text }
-        ]}>
+        <Text style={{
+          color: theme.colors.text,
+          fontSize: 16,
+          fontWeight: '500'
+        }}>
           Sign in with Google
         </Text>
-      </Button>
+      </Pressable>
+
       <Button
         mode="text"
         onPress={() => navigation.navigate('ForgotPassword' as never)}
@@ -134,11 +146,3 @@ export default function LoginScreen() {
     </View>
   );
 }
-
-
-
-
-
-
-
-

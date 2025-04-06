@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { View, TextInput, Alert, Image, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Alert, Image, Text, ImageStyle } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { signInWithEmail, signInWithGoogle } from '../services/authService';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import { signInWithEmail, signInWithGoogleCredential } from '../services/authService';
 import { useTheme } from '../context/ThemeContext';
 import { createAuthStyles } from '../styles/UserAuthScreen.styles';
+
+// Initialize WebBrowser
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -12,6 +17,21 @@ export default function LoginScreen() {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const styles = createAuthStyles(theme);
+
+  // Setup Google Auth Request
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: "208612764076-dppsfsoktqfcc6r990la6airkutteecn.apps.googleusercontent.com",
+    iosClientId: "208612764076-jmqb17e7a627elqoqa6lsbdrb1ivlg3c.apps.googleusercontent.com",
+    webClientId: "208612764076-dppsfsoktqfcc6r990la6airkutteecn.apps.googleusercontent.com",
+  });
+
+  // Handle Google Sign In response
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      handleGoogleSignIn(authentication);
+    }
+  }, [response]);
 
   const handleEmailLogin = async () => {
     try {
@@ -21,11 +41,24 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignIn = async (authentication: any) => {
     try {
-      await signInWithGoogle();
+      if (authentication?.idToken && authentication?.accessToken) {
+        await signInWithGoogleCredential(
+          authentication.idToken,
+          authentication.accessToken
+        );
+      }
     } catch (error: any) {
       Alert.alert('Error', error.message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await promptAsync();
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to initiate Google Sign In');
     }
   };
 
@@ -63,20 +96,20 @@ export default function LoginScreen() {
       >
         <Image
           source={require('../../public/images/Google.png')}
-          style={styles.googleIcon}
+          style={styles.googleIcon as ImageStyle}
         />
         <Text style={styles.googleButtonText}>Sign in with Google</Text>
       </Button>
       <Button
         mode="text"
-        onPress={() => navigation.navigate('ForgotPassword')}
+        onPress={() => navigation.navigate('ForgotPassword' as never)}
         textColor="rgb(82, 82, 82)"
       >
         Forgot Password?
       </Button>
       <Button
         mode="text"
-        onPress={() => navigation.navigate('SignUp')}
+        onPress={() => navigation.navigate('SignUp' as never)}
         textColor="rgb(211, 63, 0)"
       >
         Don't have an account? Sign Up
@@ -84,6 +117,7 @@ export default function LoginScreen() {
     </View>
   );
 }
+
 
 
 

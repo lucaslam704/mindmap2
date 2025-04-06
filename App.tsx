@@ -4,6 +4,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { NetworkStatus } from './src/components/NetworkStatus';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,11 +37,13 @@ export default function App() {
       <SafeAreaProvider>
         <PaperProvider>
           <AppNavigator />
+          <NetworkStatus />
         </PaperProvider>
       </SafeAreaProvider>
     </ThemeProvider>
   );
 }
+
 
 
 

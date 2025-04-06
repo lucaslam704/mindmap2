@@ -7,8 +7,12 @@ import {
   updateDoc, 
   deleteDoc, 
   doc, 
-  Timestamp 
+  Timestamp,
+  query,
+  where
 } from "firebase/firestore";
+import { auth } from "../../firebaseConfig";
+import { networkService } from './networkService';
 
 const TASKS_COLLECTION = "tasks";
 
@@ -22,22 +26,37 @@ export const addTask = async (task: {
   dueDate?: Date;
 }) => {
   try {
-    // Convert Date to Firestore timestamp before saving
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error("No authenticated user found");
+
     const taskToSave = {
       ...task,
-      dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : null
+      userId,
+      dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : null,
+      createdAt: Timestamp.now(),
+      pendingSync: !networkService.isNetworkOnline() // Add sync status
     };
+    
     const docRef = await addDoc(collection(db, TASKS_COLLECTION), taskToSave);
     return docRef.id;
   } catch (error) {
     console.error("Error adding task:", error);
+    throw error;
   }
 };
 
-// Get all tasks
+// Get all tasks for the current user
 export const getTasks = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, TASKS_COLLECTION));
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error("No authenticated user found");
+
+    const tasksQuery = query(
+      collection(db, TASKS_COLLECTION),
+      where("userId", "==", userId)
+    );
+    
+    const querySnapshot = await getDocs(tasksQuery);
     return querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
@@ -54,6 +73,7 @@ export const getTasks = async () => {
 
 export type TaskType = {
   id: string;
+  userId: string; // Add userId to the type
   title: string;
   description?: string;
   priority: string;
@@ -65,17 +85,28 @@ export type TaskType = {
 // Update a task
 export const updateTask = async (taskId: string, updatedFields: Partial<any>) => {
   try {
-    // Convert Date to Firestore timestamp if present
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error("No authenticated user found");
+
+    // Verify task ownership before updating
+    const taskRef = doc(db, TASKS_COLLECTION, taskId);
+    const taskDoc = await getDocs(query(
+      collection(db, TASKS_COLLECTION),
+      where("userId", "==", userId)
+    ));
+    
+    if (taskDoc.empty) {
+      throw new Error("Task not found or unauthorized");
+    }
+
     const fieldsToUpdate = { ...updatedFields };
     
     if (fieldsToUpdate.dueDate instanceof Date) {
       fieldsToUpdate.dueDate = Timestamp.fromDate(fieldsToUpdate.dueDate);
     } else if (fieldsToUpdate.dueDate === undefined) {
-      // Convert undefined to null for Firestore
       fieldsToUpdate.dueDate = null;
     }
     
-    const taskRef = doc(db, TASKS_COLLECTION, taskId);
     await updateDoc(taskRef, fieldsToUpdate);
   } catch (error) {
     console.error("Error updating task:", error);
@@ -85,8 +116,46 @@ export const updateTask = async (taskId: string, updatedFields: Partial<any>) =>
 // Delete a task
 export const deleteTask = async (taskId: string) => {
   try {
-    await deleteDoc(doc(db, TASKS_COLLECTION, taskId));
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error("No authenticated user found");
+
+    // Verify task ownership before deleting
+    const taskRef = doc(db, TASKS_COLLECTION, taskId);
+    const taskDoc = await getDocs(query(
+      collection(db, TASKS_COLLECTION),
+      where("userId", "==", userId)
+    ));
+    
+    if (taskDoc.empty) {
+      throw new Error("Task not found or unauthorized");
+    }
+
+    await deleteDoc(taskRef);
   } catch (error) {
     console.error("Error deleting task:", error);
+  }
+};
+
+// Add a function to sync pending changes
+export const syncPendingTasks = async () => {
+  try {
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    const pendingTasksQuery = query(
+      collection(db, TASKS_COLLECTION),
+      where("userId", "==", userId),
+      where("pendingSync", "==", true)
+    );
+
+    const pendingTasks = await getDocs(pendingTasksQuery);
+    
+    const updatePromises = pendingTasks.docs.map(doc => 
+      updateDoc(doc.ref, { pendingSync: false })
+    );
+
+    await Promise.all(updatePromises);
+  } catch (error) {
+    console.error("Error syncing pending tasks:", error);
   }
 };

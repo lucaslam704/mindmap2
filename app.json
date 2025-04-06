@@ -1,34 +1,19 @@
 {
   "expo": {
-    "name": "mindmap",
-    "slug": "mindmap",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+    "scheme": "mindmap",
+    "android": {
+      "package": "com.cprg303a.mindmap",
+      "googleServicesFile": "./google-services.json"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.mindmap",
+      "bundleIdentifier": "com.cprg303a.mindmap",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "googleServicesFile": "./google-services.json",
-      "package": "com.yourcompany.mindmap"
+    "extra": {
+      "eas": {
+        "projectId": "3e94d059-880b-414b-9abe-35c8ebd9193e"
+      }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "owner": "lucaslam704"
   }
 }
-
-

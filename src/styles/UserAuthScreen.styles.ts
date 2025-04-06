@@ -70,7 +70,16 @@ export const createAuthStyles = (theme: Theme) => StyleSheet.create({
       color: theme.colors.textSecondary,
     },
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+  },
 });
+
 
 
 

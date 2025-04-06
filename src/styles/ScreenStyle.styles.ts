@@ -55,6 +55,37 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
   },
   buttonText: {
     color: theme.colors.white,
-  }
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderColor: theme.colors.border,
+    marginBottom: 16,
+    fontSize: 16,
+    padding: 12,
+    color: theme.colors.text,
+  },
+  pickerContainer: {
+    borderBottomWidth: 1,
+    borderColor: theme.colors.border,
+    marginBottom: 16,
+  },
+  datePickerButton: {
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 12,
+    marginBottom: 16,
+  },
+  datePickerModalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  datePickerContent: {
+    backgroundColor: theme.colors.cardBackground,
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
 });
+
 

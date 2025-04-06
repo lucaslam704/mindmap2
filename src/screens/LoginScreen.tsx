@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Alert, Image, Text, ImageStyle } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { theme, toggleTheme, isDarkMode } = useTheme();
   const styles = createAuthStyles(theme);
 
   // Setup Google Auth Request
@@ -63,7 +63,18 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={isDarkMode 
+            ? require('../../public/images/MindMap-white.png')
+            : require('../../public/images/MindMap.png')
+          }
+          style={styles.logo as ImageStyle}
+          resizeMode="contain"
+        />
+      </View>
+
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -85,6 +96,7 @@ export default function LoginScreen() {
         onPress={handleEmailLogin}
         style={styles.button}
         buttonColor="rgb(24, 91, 207)"
+        textColor='white'
       >
         Login with Email
       </Button>
@@ -98,7 +110,12 @@ export default function LoginScreen() {
           source={require('../../public/images/Google.png')}
           style={styles.googleIcon as ImageStyle}
         />
-        <Text style={styles.googleButtonText}>Sign in with Google</Text>
+        <Text style={[
+          styles.googleButtonText,
+          { color: isDarkMode ? theme.colors.white : theme.colors.text }
+        ]}>
+          Sign in with Google
+        </Text>
       </Button>
       <Button
         mode="text"
@@ -117,6 +134,10 @@ export default function LoginScreen() {
     </View>
   );
 }
+
+
+
+
 
 
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { Button } from 'react-native-paper';
 import { signOut } from '../services/authService';
 import { useTheme } from '../context/ThemeContext';
 
 export default function SettingScreen() {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -17,12 +17,24 @@ export default function SettingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={isDarkMode 
+            ? require('../../public/images/MindMap-white.png')
+            : require('../../public/images/MindMap.png')
+          }
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+      
       <View style={styles.content}>
         <Button 
           mode="contained"
           onPress={handleLogout}
           style={styles.logoutButton}
-          buttonColor={theme.deleteButton.background}
+          buttonColor={theme.colors.lightBlue}
+          textColor={theme.colors.white}
         >
           Log Out
         </Button>
@@ -39,17 +51,28 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  logo: {
+    width: 150,
+    height: 150,
+  },
   content: {
     flex: 1,
-    justifyContent: 'flex-start',
-    paddingTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoutButton: {
+    width: '100%',
     marginVertical: 10,
   },
   version: {
     textAlign: 'center',
-    paddingBottom: 20,
-    fontSize: 12,
+    marginBottom: 20,
   },
 });
+
+

@@ -18,7 +18,7 @@ import { IconButton } from 'react-native-paper';
 import { subscribeToAuthChanges } from '../services/authService';
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import SignUpScreen from "../screens/SignUpScreen";
-import { Image } from 'react-native';
+import { Image, Text } from 'react-native';
 import SettingScreen from '../screens/SettingScreen';
 
 type TaskStackParamList = {
@@ -140,9 +140,34 @@ function ErrandsStack() {
 }
 
 function AuthNavigator() {
+  const { theme, toggleTheme, isDarkMode } = useTheme();
+
   return (
-    <AuthStack.Navigator>
-      <AuthStack.Screen name="Login" component={LoginScreen} />
+    <AuthStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerTintColor: theme.colors.text,
+      }}>
+      <AuthStack.Screen 
+        name="Login" 
+        component={LoginScreen}
+        options={{
+          headerRight: () => (
+            <IconButton
+              icon={isDarkMode ? 'white-balance-sunny' : 'moon-waning-crescent'}
+              iconColor={theme.colors.text}
+              size={24}
+              onPress={toggleTheme}
+              style={{ marginRight: 10 }}
+            />
+          ),
+          headerTitle: () => (
+            <Text style={{ color: theme.colors.text, fontSize: 20, fontWeight: 'bold' }}>
+              Login
+            </Text>
+          ),
+        }}
+      />
       <AuthStack.Screen name="SignUp" component={SignUpScreen} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </AuthStack.Navigator>

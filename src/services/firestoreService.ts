@@ -1,22 +1,22 @@
-// src/services/firestoreService.ts
 import { db } from "../../firebaseConfig";
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
   Timestamp,
   query,
-  where
+  where,
 } from "firebase/firestore";
+import * as Notifications from "expo-notifications";
 import { auth } from "../../firebaseConfig";
-import { networkService } from './networkService';
+import { networkService } from "./networkService";
 
 const TASKS_COLLECTION = "tasks";
 
-// Add a new task
+// Add a new task and schedule a reminder
 export const addTask = async (task: {
   title: string;
   description?: string;
@@ -32,12 +32,24 @@ export const addTask = async (task: {
     const taskToSave = {
       ...task,
       userId,
-      dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : null,
+      dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : undefined,
       createdAt: Timestamp.now(),
-      pendingSync: !networkService.isNetworkOnline() // Add sync status
+      pendingSync: !networkService.isNetworkOnline(),
     };
-    
+
     const docRef = await addDoc(collection(db, TASKS_COLLECTION), taskToSave);
+
+    if (task.dueDate && task.dueDate > new Date()) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "MindMap Reminder",
+          body: `Your task "${task.title}" is due soon.`,
+          sound: "default",
+        },
+        trigger: task.dueDate as unknown as Notifications.NotificationTriggerInput, // ✅ TS-safe
+      });
+    }
+
     return docRef.id;
   } catch (error) {
     console.error("Error adding task:", error);
@@ -55,14 +67,14 @@ export const getTasks = async () => {
       collection(db, TASKS_COLLECTION),
       where("userId", "==", userId)
     );
-    
+
     const querySnapshot = await getDocs(tasksQuery);
     return querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
         ...data,
-        dueDate: data.dueDate ? data.dueDate.toDate() : undefined
+        dueDate: data.dueDate ? (data.dueDate as Timestamp).toDate() : undefined,
       };
     }) as TaskType[];
   } catch (error) {
@@ -73,7 +85,7 @@ export const getTasks = async () => {
 
 export type TaskType = {
   id: string;
-  userId: string; // Add userId to the type
+  userId: string;
   title: string;
   description?: string;
   priority: string;
@@ -83,30 +95,31 @@ export type TaskType = {
 };
 
 // Update a task
-export const updateTask = async (taskId: string, updatedFields: Partial<any>) => {
+export const updateTask = async (
+  taskId: string,
+  updatedFields: Partial<TaskType>
+) => {
   try {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error("No authenticated user found");
 
-    // Verify task ownership before updating
     const taskRef = doc(db, TASKS_COLLECTION, taskId);
-    const taskDoc = await getDocs(query(
-      collection(db, TASKS_COLLECTION),
-      where("userId", "==", userId)
-    ));
-    
+    const taskDoc = await getDocs(
+      query(collection(db, TASKS_COLLECTION), where("userId", "==", userId))
+    );
+
     if (taskDoc.empty) {
       throw new Error("Task not found or unauthorized");
     }
 
-    const fieldsToUpdate = { ...updatedFields };
-    
+    const fieldsToUpdate: any = { ...updatedFields };
+
     if (fieldsToUpdate.dueDate instanceof Date) {
       fieldsToUpdate.dueDate = Timestamp.fromDate(fieldsToUpdate.dueDate);
     } else if (fieldsToUpdate.dueDate === undefined) {
-      fieldsToUpdate.dueDate = null;
+      fieldsToUpdate.dueDate = undefined;
     }
-    
+
     await updateDoc(taskRef, fieldsToUpdate);
   } catch (error) {
     console.error("Error updating task:", error);
@@ -119,13 +132,11 @@ export const deleteTask = async (taskId: string) => {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error("No authenticated user found");
 
-    // Verify task ownership before deleting
     const taskRef = doc(db, TASKS_COLLECTION, taskId);
-    const taskDoc = await getDocs(query(
-      collection(db, TASKS_COLLECTION),
-      where("userId", "==", userId)
-    ));
-    
+    const taskDoc = await getDocs(
+      query(collection(db, TASKS_COLLECTION), where("userId", "==", userId))
+    );
+
     if (taskDoc.empty) {
       throw new Error("Task not found or unauthorized");
     }
@@ -136,7 +147,7 @@ export const deleteTask = async (taskId: string) => {
   }
 };
 
-// Add a function to sync pending changes
+// Sync tasks marked as pending
 export const syncPendingTasks = async () => {
   try {
     const userId = auth.currentUser?.uid;
@@ -149,8 +160,8 @@ export const syncPendingTasks = async () => {
     );
 
     const pendingTasks = await getDocs(pendingTasksQuery);
-    
-    const updatePromises = pendingTasks.docs.map(doc => 
+
+    const updatePromises = pendingTasks.docs.map((doc) =>
       updateDoc(doc.ref, { pendingSync: false })
     );
 

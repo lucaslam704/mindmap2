@@ -16,7 +16,7 @@
     "@react-navigation/stack": "^6.3.20",
     "expo": "~52.0.41",
     "expo-auth-session": "~6.0.3",
-    "expo-notifications": "^0.29.14",
+    "expo-notifications": "~0.29.14",
     "expo-random": "^14.0.1",
     "expo-status-bar": "~2.0.1",
     "expo-web-browser": "~14.0.2",

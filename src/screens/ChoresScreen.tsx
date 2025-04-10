@@ -19,6 +19,7 @@ Notifications.setNotificationHandler({
 export default function ChoresScreen() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [filter, setFilter] = useState<'none' | 'newest' | 'due' | 'priority'>('none');
   const navigation = useNavigation<any>();
   const categoryname = "Chores";
   const { theme } = useTheme();
@@ -58,46 +59,73 @@ export default function ChoresScreen() {
     }
   };
 
+  const getSortedTasks = () => {
+    const activeTasks = tasks.filter(task => !task.completed);
+    switch (filter) {
+      case 'newest':
+        return [...activeTasks].sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+      case 'due':
+        return [...activeTasks].sort((a, b) => (a.dueDate?.getTime() || 0) - (b.dueDate?.getTime() || 0));
+      case 'priority':
+        const priorityOrder: Record<'High' | 'Medium' | 'Low', number> = {
+          High: 1,
+          Medium: 2,
+          Low: 3
+        };
+        return [...activeTasks].sort((a, b) =>
+          priorityOrder[a.priority as 'High' | 'Medium' | 'Low'] -
+          priorityOrder[b.priority as 'High' | 'Medium' | 'Low']
+        );
+      default:
+        return activeTasks;
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
+        {[
+          { label: 'No Filter', value: 'none' },
+          { label: 'Newest', value: 'newest' },
+          { label: 'Due Date', value: 'due' },
+          { label: 'Priority', value: 'priority' },
+        ].map(option => (
+          <TouchableOpacity
+            key={option.value}
+            onPress={() => setFilter(option.value as any)}
+            style={{
+              backgroundColor: filter === option.value ? theme.colors.primary : theme.colors.cardBackground,
+              padding: 8,
+              borderRadius: 6,
+              marginRight: 6,
+              marginBottom: 6,
+              borderWidth: 1,
+              borderColor: filter === option.value ? theme.colors.primary : theme.colors.border
+            }}
+          >
+            <Text style={{ color: filter === option.value ? '#fff' : theme.colors.text }}>
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={tasks.filter(task => !task.completed)}
+        data={getSortedTasks()}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
           <TouchableOpacity 
-            style={[
-              styles.taskItem,
-              { 
-                backgroundColor: theme.colors.cardBackground,
-                borderColor: theme.colors.border
-              }
-            ]}
+            style={[styles.taskItem, {
+              backgroundColor: theme.colors.cardBackground,
+              borderColor: theme.colors.border
+            }]}
             onPress={() => navigation.navigate('TaskDetails', { task: item })}
           >
-            <Text style={[
-              styles.taskTitle,
-              { color: theme.colors.text }
-            ]}>
-              {item.title}
-            </Text>
-            <Text style={[
-              styles.taskInfo,
-              { color: getPriorityColor(item.priority) }
-            ]}>
-              Priority: {item.priority}
-            </Text>
-            <Text style={[
-              styles.taskInfo,
-              { color: theme.colors.textSecondary }
-            ]}>
-              Due Date: {item.dueDate ? item.dueDate.toLocaleString(undefined, { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric', 
-                    hour: '2-digit', 
-                    minute: '2-digit' }) 
-                    : "No due date"}
+            <Text style={[styles.taskTitle, { color: theme.colors.text }]}>{item.title}</Text>
+            <Text style={[styles.taskInfo, { color: getPriorityColor(item.priority) }]}>Priority: {item.priority}</Text>
+            <Text style={[styles.taskInfo, { color: theme.colors.textSecondary }]}>
+              Due Date: {item.dueDate ? item.dueDate.toLocaleString() : "No due date"}
             </Text>
             <View style={styles.buttonContainer}>
               <Button 
@@ -122,29 +150,23 @@ export default function ChoresScreen() {
           </TouchableOpacity>
         )}
       />
+
       <FAB 
-        icon={({ size, color }) => (
+        icon={({ size }) => (
           <Image 
             source={require('../../public/images/AddTask.png')} 
-            style={{ 
-              width: size, 
-              height: size, 
-              tintColor: theme.colors.addtask 
-            }}
+            style={{ width: size, height: size, tintColor: theme.colors.addtask }}
           />
         )}
         style={styles.fabAdd}
         onPress={() => setModalVisible(true)}
       />
+
       <FAB 
-        icon={({ size, color }) => (
+        icon={({ size }) => (
           <Image 
             source={require('../../public/images/CompletedTask.png')} 
-            style={{ 
-              width: size, 
-              height: size, 
-              tintColor: theme.colors.completedtask 
-            }}
+            style={{ width: size, height: size, tintColor: theme.colors.completedtask }}
           />
         )}
         style={styles.fabComplete}

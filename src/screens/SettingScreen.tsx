@@ -27,8 +27,39 @@ export default function SettingScreen() {
           resizeMode="contain"
         />
       </View>
-      
+
       <View style={styles.content}>
+        <View style={styles.settingsGroup}>
+          <Button
+            mode="outlined"
+            onPress={() => console.log('Change Password')}
+            style={styles.settingsButton}
+          >
+            Change Password
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() => console.log('Change Security Q&A')}
+            style={styles.settingsButton}
+          >
+            Change Security Q&A
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() => console.log('Terms & Conditions')}
+            style={styles.settingsButton}
+          >
+            Terms & Conditions
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() => console.log('Contact Us')}
+            style={styles.settingsButton}
+          >
+            About / Contact Us
+          </Button>
+        </View>
+
         <Button 
           mode="contained"
           onPress={handleLogout}
@@ -39,9 +70,8 @@ export default function SettingScreen() {
           Log Out
         </Button>
       </View>
-      <Text style={[styles.version, { color: theme.colors.textSecondary }]}>
-        Mind Map version 1.0.1
-      </Text>
+
+      <Text style={[styles.version, { color: theme.colors.textSecondary }]}>Mind Map version 1.0.1</Text>
     </View>
   );
 }
@@ -57,22 +87,27 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 180,
+    height: 60,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  settingsGroup: {
+    marginBottom: 30,
+  },
+  settingsButton: {
+    marginVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
   },
   logoutButton: {
-    width: '100%',
-    marginVertical: 10,
+    borderRadius: 8,
+    marginTop: 20,
   },
   version: {
     textAlign: 'center',
-    marginBottom: 20,
+    fontSize: 12,
+    marginTop: 20,
   },
 });
-
-

@@ -43,10 +43,10 @@ export const addTask = async (task: {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "MindMap Reminder",
-          body: `Your task "${task.title}" is due soon.`,
+          body: `Your task \"${task.title}\" is due soon.`,
           sound: "default",
         },
-        trigger: task.dueDate as unknown as Notifications.NotificationTriggerInput, // ✅ TS-safe
+        trigger: task.dueDate as unknown as Notifications.NotificationTriggerInput,
       });
     }
 
@@ -75,6 +75,7 @@ export const getTasks = async () => {
         id: doc.id,
         ...data,
         dueDate: data.dueDate ? (data.dueDate as Timestamp).toDate() : undefined,
+        createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : undefined,
       };
     }) as TaskType[];
   } catch (error) {
@@ -92,6 +93,7 @@ export type TaskType = {
   category: "School" | "Chores" | "Errands";
   completed: boolean;
   dueDate?: Date;
+  createdAt?: Date;
 };
 
 // Update a task
